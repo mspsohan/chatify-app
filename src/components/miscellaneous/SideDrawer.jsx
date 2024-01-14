@@ -1,22 +1,24 @@
 import { BellIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { Avatar, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
+import { Avatar, Box, Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Input, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Spinner, Text, Tooltip, useDisclosure, useToast } from "@chakra-ui/react";
 import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import ProfileModal from "./ProfileModal";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import ChatLoading from "../ChatLoading/ChatLoading";
 import UserListItem from "../UserAvatar/UserListItem";
+import useAxios from "../../hooks/useAxios";
 
 const SideDrawer = () => {
    const [search, setSearch] = useState("")
    const [searchResult, setSearchResult] = useState([])
    const [loading, setLoading] = useState(false)
    const [loadingChat, setLoadingChat] = useState()
-   const { user, setSelectedChat, chat, setChat } = useAuth()
+   const { user, setSelectedChat, chats, setChats } = useAuth()
    const navigate = useNavigate()
    const toast = useToast()
    const { isOpen, onOpen, onClose } = useDisclosure()
+   const axios = useAxios()
+
    const logoutHandler = () => {
       localStorage.removeItem("userInfo")
       navigate("/")
@@ -39,7 +41,7 @@ const SideDrawer = () => {
                Authorization: `Bearer ${user.token}`
             }
          }
-         const { data } = await axios.get(`http://localhost:5000/api/user/?search=${search}`, config)
+         const { data } = await axios.get(`/api/user/?search=${search}`, config)
          setLoading(false)
          setSearchResult(data)
       } catch (error) {
@@ -55,28 +57,33 @@ const SideDrawer = () => {
    }
 
    const accessChat = async (userId) => {
+      console.log(userId);
+
       try {
-         setLoadingChat(true)
+         setLoadingChat(true);
          const config = {
             headers: {
                "Content-type": "application/json",
-               Authorization: `Bearer ${userId}`
-            }
-         }
-         const { data } = await axios.post('https://localhost:5000/api/chat', { userId }, config)
-         setSelectedChat(data)
-         setLoadingChat(false)
+               Authorization: `Bearer ${user.token}`,
+            },
+         };
+         const { data } = await axios.post(`/api/chat`, { userId }, config);
+
+         if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
+         setSelectedChat(data);
+         setLoadingChat(false);
+         onClose();
       } catch (error) {
          toast({
-            title: "Error Fetching Chat",
+            title: "Error fetching the chat",
             description: error.message,
             status: "error",
             duration: 5000,
             isClosable: true,
-            position: "bottom-left"
-         })
+            position: "bottom-left",
+         });
       }
-   }
+   };
 
    return (
       <>
@@ -136,6 +143,9 @@ const SideDrawer = () => {
                            <UserListItem key={user._id} user={user} handleFunction={() => accessChat(user._id)} />
                         ))
                      )
+                  }
+                  {
+                     loadingChat && <Spinner ml="auto" display="flex" />
                   }
                </DrawerBody>
 

@@ -1,7 +1,7 @@
 import { Button, FormControl, FormLabel, Input, InputGroup, InputRightElement, VStack, useToast } from "@chakra-ui/react";
-import axios from "axios";
-import { useState } from "react";
+import axios from "axios"; import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAxios from "../../hooks/useAxios";
 
 const SignUp = () => {
    const [show, setShow] = useState()
@@ -13,6 +13,7 @@ const SignUp = () => {
    const [picLoading, setPicLoading] = useState()
    const toast = useToast()
    const navigate = useNavigate();
+   const axios = useAxios()
 
    const postDetails = (pics) => {
       setPicLoading(true)
@@ -84,7 +85,7 @@ const SignUp = () => {
                "Content-type": "application/json",
             },
          };
-         const { data } = await axios.post("http://localhost:5000/api/user", { name, email, password, pic }, config);
+         const { data } = await axios.post("/api/user", { name, email, password, pic }, config);
          toast({
             title: "Registration Successful",
             status: "success",
