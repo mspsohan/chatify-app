@@ -1,5 +1,5 @@
 import { Box } from "@chakra-ui/react";
-import useAuth from "../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 import SingleChat from "./SingleChat";
 
 const ChatBox = () => {

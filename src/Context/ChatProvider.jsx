@@ -1,7 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 export const ChatContext = createContext()
+const RedirectComponent = () => {
+   const navigate = useNavigate();
+   useEffect(() => {
+      navigate('/');
+   }, [navigate]);
 
+   return null;
+};
 const ChatProvider = ({ children }) => {
    const [user, setUser] = useState();
    const [selectedChat, setSelectedChat] = useState();
@@ -16,7 +23,7 @@ const ChatProvider = ({ children }) => {
       setLoading(false); // Set loading to false after retrieving user data
 
       if (!userInfo) {
-         window.location.href = '/';
+         return <RedirectComponent />
       }
    }, []);
 
